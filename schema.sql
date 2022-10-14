@@ -71,9 +71,10 @@ create table Rooms (
 
 /* Subjects entity set -- done */
 create table Subjects (
-	name char(32) primary key,
+	name char(32),
 	double_lesson boolean default false,
 	grade char(32) references Grades(name) not null,
+	primary key (name, grade),
 	foreign key (grade) references Grades(name) on delete cascade
 );
 
@@ -83,5 +84,8 @@ create table Schedule (
 	teacher char(32) references Teachers(initials) not null,
 	day DAYS not null,
 	time tsrange not null,
-	foreign key (day, time) references Lessons (day, time)
+	foreign key (day, time) references Lessons (day, time),
+	UNIQUE(day, time, teacher), /* one teacher teaches only one lesson at a time */
+	UNIQUE(day, time, room), /* one room hosts only one lesson at a time */
+	UNIQUE(day, time, grade) /* one grade can attend only one lesson at a time */
 );
