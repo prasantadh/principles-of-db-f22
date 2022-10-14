@@ -12,13 +12,14 @@ create type DAYS as ENUM
 	'SATURDAY'
 );
 
-/* entity set Term -- done */
+/* entity set Terms */
 drop table if exists Terms;
 create table Terms (
 	year integer primary key,
 	CHECK ( year > 2021 )
 );
 
+/* entity set Lessons */
 create table Lessons (
 	day DAYS,
 	time tsrange,
@@ -28,6 +29,8 @@ create table Lessons (
 	exclude using gist (time with &&) /* have non-overlapping range only for lessons */
 );
 
+/* entity set Grades
+with relationship sets Lunch and Assembly */
 create table Grades (
 	name char(32) primary key,
 	lunch_day DAYS 
@@ -44,19 +47,21 @@ create table Grades (
 	foreign key (assembly_day, assembly_time) references Lessons(day, time)
 );
 
-/* Students entity set -- done */
+/* entity set Students 
+with relationship set attend */
 create table Students (
 	id integer primary key,
 	attend char(32) references Grades(name) 
 		not null	/* total participation */
 );
 
-/* Departments entity set -- DONE */
+/* entity set Departments */
 create table Departments (
 	name char(32) primary key
 );
 
-/* Teachers entity set -- done */
+/* Teachers entity set
+with relationship set Works_in */
 create table Teachers (
 	initials char(32) primary key,
 	half_day DAYS not null,
@@ -64,12 +69,12 @@ create table Teachers (
 	department char(32) references Departments(name) not null
 );
 
-/* Rooms entity set -- done */
+/* entity set Rooms */
 create table Rooms (
 	name char(32) primary key
 );
 
-/* Subjects entity set -- done */
+/* entity set Subjects */
 create table Subjects (
 	name char(32),
 	double_lesson boolean default false,
@@ -78,14 +83,16 @@ create table Subjects (
 	foreign key (grade) references Grades(name) on delete cascade
 );
 
+/* relationship set Schedule */
 create table Schedule (
 	grade char(32) references Grades(name) not null,
 	room char(32) references Rooms(name) not null,
 	teacher char(32) references Teachers(initials) not null,
+	term int references Term(year) not null,
 	day DAYS not null,
 	time tsrange not null,
 	foreign key (day, time) references Lessons (day, time),
-	UNIQUE(day, time, teacher), /* one teacher teaches only one lesson at a time */
-	UNIQUE(day, time, room), /* one room hosts only one lesson at a time */
-	UNIQUE(day, time, grade) /* one grade can attend only one lesson at a time */
+	UNIQUE(day, time, teacher, term), /* one teacher teaches only one lesson at a time */
+	UNIQUE(day, time, room, term), /* one room hosts only one lesson at a time */
+	UNIQUE(day, time, grade, term) /* one grade can attend only one lesson at a time */
 );
