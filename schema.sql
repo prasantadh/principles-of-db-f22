@@ -13,7 +13,6 @@ create type DAYS as ENUM
 );
 
 /* entity set Terms */
-drop table if exists Terms;
 create table Terms (
 	year integer primary key,
 	CHECK ( year > 2021 )
@@ -78,9 +77,11 @@ create table Rooms (
 create table Subjects (
 	name char(32),
 	double_lesson boolean default false,
-	grade char(32) references Grades(name) not null,
-	primary key (name, grade),
-	foreign key (grade) references Grades(name) on delete cascade
+	term int not null,
+	grade char(32) not null,
+	primary key (name, grade, term),
+	foreign key (grade) references Grades(name) on delete cascade,
+	foreign key (term) references Terms(year) on delete cascade
 );
 
 /* relationship set Schedule */
@@ -88,7 +89,7 @@ create table Schedule (
 	grade char(32) references Grades(name) not null,
 	room char(32) references Rooms(name) not null,
 	teacher char(32) references Teachers(initials) not null,
-	term int references Term(year) not null,
+	term int references Terms(year) not null,
 	day DAYS not null,
 	time tsrange not null,
 	foreign key (day, time) references Lessons (day, time),
