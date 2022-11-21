@@ -1,4 +1,4 @@
-drop table if exists Schedule, Terms, Lessons, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
+drop table if exists Schedule, Terms, Lessons, Lunch, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
 drop type if exists DAYS;
 
 create type DAYS as ENUM 
@@ -28,28 +28,33 @@ create table Lessons (
 	exclude using gist (time with &&) /* have non-overlapping range only for lessons */
 );
 
-/* entity set Grades
-with relationship sets Lunch and Assembly */
+/* entity set Grades with relationship sets Lunch and Assembly */
 create table Grades (
 	name char(32) primary key,
-	lunch_day DAYS 
-		not null	/* must have lunch */
-		unique, /* only one lunch lesson per day */
-	lunch_time tsrange
-		not null,
-	foreign key (lunch_day, lunch_time) references Lessons(day, time),
 	assembly_day DAYS
-		not null
-		unique,
-	assembly_time tsrange
 		not null,
-	foreign key (assembly_day, assembly_time) references Lessons(day, time)
+	assembly_time tsrange,
+	foreign key (assembly_day, assembly_time) references Lessons(day, time),
+	/* there's only one assembly lesson for a grade */
+	unique (name, assembly_day)
+);
+
+
+create table Lunch (
+	lunch_day DAYS not null,
+	lunch_time tsrange,
+	foreign key (lunch_day, lunch_time) references Lessons(day, time),
+	grade char(32) references Grades(name) not null,
+	primary key(grade, lunch_day, lunch_time) 
+	/* ^ is to ensure each grade gets at most one lunch
+	lesson per day */
 );
 
 /* entity set Students 
 with relationship set attend */
 create table Students (
 	id integer primary key,
+	name char(64),
 	attend char(32) references Grades(name) 
 		not null	/* total participation */
 );
@@ -60,7 +65,7 @@ create table Departments (
 );
 
 /* Teachers entity set
-with relationship set Works_in */
+with relationship set Works_in and Half_Day */
 create table Teachers (
 	initials char(32) primary key,
 	half_day DAYS not null,
@@ -77,8 +82,8 @@ create table Rooms (
 create table Subjects (
 	name char(32),
 	double_lesson boolean default false,
-	term int not null,
-	grade char(32) not null,
+	term int,
+	grade char(32),
 	primary key (name, grade, term),
 	foreign key (grade) references Grades(name) on delete cascade,
 	foreign key (term) references Terms(year) on delete cascade
