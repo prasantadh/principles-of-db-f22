@@ -31,10 +31,25 @@ def insert_lunches():
         for grade in grades:
             print("insert into Lunch values ('{}', '[2022-01-0{} 11:30, 2022-01-0{} 12:15)', '{}' );".format(days[day], day+1, day+1, grade))
 
+def insert_departments():
+    departments = ['English', 'Mathematics']
+    for department in departments:
+        print("insert into departments values ('{}');".format(department))
+
+def insert_rooms():
+    for room in range(100):
+        print("insert into rooms values('{}');".format(room))
+
+def insert_terms():
+    print("insert into terms values('{}');".format(2022))
+
 if __name__ == "__main__":
     # insert_lessons()
     # insert_grades()
-    insert_lunches()
+    # insert_lunches()
+    # insert_departments()
+    # insert_rooms()
+    insert_terms()
 
 
 
