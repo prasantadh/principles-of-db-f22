@@ -45,8 +45,8 @@ def insert_terms():
     print("insert into terms values('{}');".format(2022))
 
 def insert_teachers():
-    maths   = 'MATHEMATICS'
-    eng     = 'ENGLISH'
+    maths   = 'Mathematics'
+    eng     = 'English'
     teachers = [
             ['AKC', 'THURSDAY',  maths],
             ['DMS', 'WEDNESDAY', maths],
