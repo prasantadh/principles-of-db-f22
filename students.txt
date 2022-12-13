@@ -16,7 +16,7 @@ insert into Students values('BDKNR','Neerendra Varghese','A2B');
 insert into Students values('BDKOW','Ricky Kaur','A1B');
 insert into Students values('BDKZ9','Kajal Gupta','10A');
 insert into Students values('BDKOP','Malik Arya','A1A');
-insert into Students values('BDKV2','Aisha Sarin' ,'7C');
+insert into Students values('BDKV2','Aisha Sarin','7C');
 insert into Students values('BDKZJ','Neerendra Chhabra','5C');
 insert into Students values('BDKU7','Emran Karnik','6C');
 insert into Students values('BDKLY','Rehman Sabharwal ','5B');
