@@ -26,6 +26,7 @@ def insert_lunches():
     for i in range(5, 12):
         for j in range(ord('A'), ord('E')):
             grades.append(str(i) + chr(j))
+    grades += ['A1A', 'A1B', 'A2A', 'A2B', 'A1C', 'A2C']
 
     days  = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
     for day in range(len(days)):
@@ -86,7 +87,40 @@ def insert_schedules():
     extract_schedule('BL')
     extract_schedule('BS')
 
+def insert_students():
+    with open('students.txt') as f:
+        data=f.read()
+        print(data)
+
+def insert_subjects():
+    grades = []
+    for i in range(5, 12):
+        for j in range(ord('A'), ord('E')):
+            grades.append(str(i) + chr(j))
+    grades += ['A1A', 'A1B', 'A2A', 'A2B', 'A1C', 'A2C']
+    for grade in grades:
+        print("insert into subjects values ('Compulsary Mathematics', false, '2022', '{}');".format(grade))
+        print("insert into subjects values ('Optional Mathematics', false, '2022', '{}');".format(grade))
+        print("insert into subjects values ('English', false, '2022', '{}');".format(grade))
+
+def insert_teachers_know():
+    grades = []
+    for i in range(5, 12):
+        for j in range(ord('A'), ord('E')):
+            grades.append(str(i) + chr(j))
+    grades += ['A1A', 'A1B', 'A2A', 'A2B', 'A1C', 'A2C']
+
+    for grade in grades:
+        print("insert into Teachers_know values ('AKC', 'Compulsary Mathematics', '{}', '2022');".format(grade))
+        print("insert into Teachers_know values ('DMS', 'Optional Mathematics', '{}', '2022');".format(grade))
+        print("insert into Teachers_know values ('BS', 'Optional Mathematics', '{}', '2022');".format(grade))
+        print("insert into Teachers_know values ('BL', 'Optional Mathematics', '{}', '2022');".format(grade))
+
 if __name__ == "__main__":
+    with open('schema.sql') as f:
+        data = f.read();
+        print(data)
+
     insert_lessons()
     insert_grades()
     insert_lunches()
@@ -95,3 +129,6 @@ if __name__ == "__main__":
     insert_terms()
     insert_teachers()
     insert_schedules()
+    insert_students()
+    insert_subjects()
+    insert_teachers_know()

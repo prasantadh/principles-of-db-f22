@@ -1,4 +1,4 @@
-drop table if exists Schedule, Terms, Lessons, Lunch, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
+drop table if exists Teachers_know, Schedule, Terms, Lessons, Lunch, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
 drop type if exists DAYS;
 
 create type DAYS as ENUM 
@@ -98,6 +98,15 @@ create table Subjects (
 	primary key (name, grade, term),
 	foreign key (grade) references Grades(name) on delete cascade,
 	foreign key (term) references Terms(year) on delete cascade
+);
+
+create table Teachers_know (
+    teacher char(32),
+    subject char(32),
+    grade char(32),
+    term int,
+    foreign key (subject, grade, term) references Subjects(name, grade, term),
+    primary key(subject, grade, term, teacher)
 );
 
 /* relationship set Schedule */
