@@ -17,6 +17,7 @@ def insert_grades():
     for i in range(5, 11):
         for j in range(ord('A'), ord('E')):
             grades.append(str(i) + chr(j))
+    grades += ['A1A', 'A1B', 'A2A', 'A2B', 'A1C', 'A2C']
     for grade in grades:
         print("insert into grades values ('{}', 'MONDAY', '[2022-01-02 8:30, 2022-01-02 9:15)');".format(grade))
 
@@ -57,6 +58,8 @@ def insert_teachers():
 
 import pandas as pd
 from math import isnan
+from datetime import datetime
+from datetime import timedelta
 df = pd.read_csv('data.csv')
 
 def extract_schedule(teacher):
@@ -68,8 +71,11 @@ def extract_schedule(teacher):
             grade = value
         else:
             day = day.upper()
-            print("insert into schedules values ( '{}', '{}', '{}', '{}', '{}', '[2022-01-0{} {}, 2022-01-0{} {} )');"
-              .format( grade, value, teacher, 2022, day, days.index(day), time, days.index(day),  ))
+            startstr = '2022-01-0{} {}'.format(days.index(day) + 1, time)
+            start = datetime.strptime(startstr, '%Y-%m-%d %I:%M %p')
+            end = start + timedelta(minutes=45)
+            print("insert into schedules values ( '{}', '{}', '{}', '{}', '{}', '[{}, {})');"
+                .format( grade, value, teacher, 2022, day, start, end))
 
 def insert_schedules():
     # this is not really scalable
