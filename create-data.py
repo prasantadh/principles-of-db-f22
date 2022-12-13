@@ -31,8 +31,8 @@ def insert_lunches():
         for grade in grades:
             print("insert into Lunch values ('{}', '[2022-01-0{} 11:30, 2022-01-0{} 12:15)', '{}' );".format(days[day], day+1, day+1, grade))
 
+departments = ['English', 'Mathematics']
 def insert_departments():
-    departments = ['English', 'Mathematics']
     for department in departments:
         print("insert into departments values ('{}');".format(department))
 
@@ -43,13 +43,49 @@ def insert_rooms():
 def insert_terms():
     print("insert into terms values('{}');".format(2022))
 
+def insert_teachers():
+    maths   = 'MATHEMATICS'
+    eng     = 'ENGLISH'
+    teachers = [
+            ['AKC', 'THURSDAY',  maths],
+            ['DMS', 'WEDNESDAY', maths],
+            ['BL',  'SUNDAY',    eng],
+            ['BS',  'TUESDAY', eng]
+            ]
+    for teacher in teachers:
+        print("insert into Teachers values ('{}','{}','{}','{}');" .format(teacher[0], teacher[1], 2022, teacher[2]))
+
+import pandas as pd
+from math import isnan
+df = pd.read_csv('data.csv')
+
+def extract_schedule(teacher):
+    times = ['8:30', '9:15', '10:00', '10:45', '11:30', '12:15', '13:00', '13:45', '14:30', '15:15', '16:00']
+    days  = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
+    for i, day, time, value in df[['Days', 'Lesson_Times', teacher]].itertuples():
+        if (str(value) == 'nan'): continue
+        if i % 2 == 0:
+            grade = value
+        else:
+            day = day.upper()
+            print("insert into schedules values ( '{}', '{}', '{}', '{}', '{}', '[2022-01-0{} {}, 2022-01-0{} {} )');"
+              .format( grade, value, teacher, 2022, day, days.index(day), time, days.index(day),  ))
+
+def insert_schedules():
+    # this is not really scalable
+    # at the moment, going with something that works
+    # since we are only using a small subset of teachers
+    extract_schedule('AKC')
+    extract_schedule('DMS')
+    extract_schedule('BL')
+    extract_schedule('BS')
+
 if __name__ == "__main__":
     # insert_lessons()
     # insert_grades()
     # insert_lunches()
     # insert_departments()
     # insert_rooms()
-    insert_terms()
-
-
-
+    # insert_terms()
+    # insert_teachers()
+    insert_schedules()
