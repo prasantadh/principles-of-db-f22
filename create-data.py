@@ -75,7 +75,7 @@ def extract_schedule(teacher):
             startstr = '2022-01-0{} {}'.format(days.index(day) + 1, time)
             start = datetime.strptime(startstr, '%Y-%m-%d %I:%M %p')
             end = start + timedelta(minutes=45)
-            print("insert into schedule values ( '{}', '{}', '{}', '{}', '{}', '[{}, {})');"
+            print("insert into schedules values ( '{}', '{}', '{}', '{}', '{}', '[{}, {})');"
                 .format( grade, value, teacher, 2022, day, start, end))
 
 def insert_schedules():

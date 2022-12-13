@@ -1,4 +1,4 @@
-drop table if exists Teachers_know, Schedule, Terms, Lessons, Lunch, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
+drop table if exists Teachers_know, Schedules, Terms, Lessons, Lunch, Rooms, Departments, Subjects, Grades, Students, Terms, Teachers;
 drop type if exists DAYS;
 
 create type DAYS as ENUM 
@@ -111,7 +111,7 @@ create table Teachers_know (
 
 /* relationship set Schedule */
 --populated
-create table Schedule (
+create table Schedules (
 	grade char(32) references Grades(name) not null,
 	room integer references Rooms(room_number) not null,
 	teacher char(32) references Teachers(initials) not null,
