@@ -14,7 +14,7 @@ def insert_lessons():
 
 def insert_grades():
     grades = []
-    for i in range(5, 11):
+    for i in range(5, 12):
         for j in range(ord('A'), ord('E')):
             grades.append(str(i) + chr(j))
     grades += ['A1A', 'A1B', 'A2A', 'A2B', 'A1C', 'A2C']
@@ -23,7 +23,7 @@ def insert_grades():
 
 def insert_lunches():
     grades = []
-    for i in range(5, 11):
+    for i in range(5, 12):
         for j in range(ord('A'), ord('E')):
             grades.append(str(i) + chr(j))
 
@@ -74,7 +74,7 @@ def extract_schedule(teacher):
             startstr = '2022-01-0{} {}'.format(days.index(day) + 1, time)
             start = datetime.strptime(startstr, '%Y-%m-%d %I:%M %p')
             end = start + timedelta(minutes=45)
-            print("insert into schedules values ( '{}', '{}', '{}', '{}', '{}', '[{}, {})');"
+            print("insert into schedule values ( '{}', '{}', '{}', '{}', '{}', '[{}, {})');"
                 .format( grade, value, teacher, 2022, day, start, end))
 
 def insert_schedules():
@@ -87,11 +87,11 @@ def insert_schedules():
     extract_schedule('BS')
 
 if __name__ == "__main__":
-    # insert_lessons()
-    # insert_grades()
-    # insert_lunches()
-    # insert_departments()
-    # insert_rooms()
-    # insert_terms()
-    # insert_teachers()
+    insert_lessons()
+    insert_grades()
+    insert_lunches()
+    insert_departments()
+    insert_rooms()
+    insert_terms()
+    insert_teachers()
     insert_schedules()
