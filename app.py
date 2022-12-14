@@ -61,8 +61,19 @@ if select == 'Teachers':
 
     try:
         data = query_db("SELECT initials FROM Teachers;")
-        teacher = st.selectbox('Pick a teacher', data)
-        st.dataframe(query_db("SELECT * from schedules where teacher='{}';".format(teacher)))
+        teacher = st.selectbox('Pick a teacher: ', data)
+        st.write("Schedule: ")
+        st.dataframe(query_db("SELECT day, time, grade, room from schedules where teacher='{}' order by day, time;".format(teacher)))
+        st.write("Students Taught: ")
+        sql = """
+        SELECT distinct students.name, students.attend
+        from students
+        join
+        schedules
+        on students.attend=schedules.grade
+        where schedules.teacher='{}'
+        order by students.attend, students.name""".format(teacher)
+        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
     #possible to choose teacher then show their half days, schedules
