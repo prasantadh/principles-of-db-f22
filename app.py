@@ -91,7 +91,7 @@ if select == 'Students':
         data = query_db("SELECT name FROM Students;")
         student = st.selectbox('Pick a student: ', data)
         st.write("Schedule: ")
-        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules where grade=(select attend from students where name = '{}') order by day, time;".format(student)))
+        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules inner join students on schedules.grade=students.attend where students.name = '{}' order by day, time".format(student)))
         st.write("Students Taught: ")
     except Exception as e:
         st.write(e)
