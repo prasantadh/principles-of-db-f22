@@ -9,9 +9,23 @@ def get_config(filename="database.ini", section="postgresql"):
     parser.read(filename)
     return {k: v for k, v in parser.items(section)}
 
-db_info = get_config()
-conn = psycopg2.connect(**db_info)
-curr = conn.cursor()
+@st.cache
+def query_db(sql: str):
+    db_info = get_config()
+    conn = psycopg2.connect(**db_info)
+    curr = conn.cursor()
+    curr.execute(sql)
+
+    data = curr.fetchall()
+    column_names = [desc[0] for desc in curr.description]
+    conn.commit()
+
+    curr.close()
+    conn.close()
+
+    df = pd.DataFrame(data=data, columns=column_names)
+    return df
+
 #OUTPUT
 st.sidebar.title("Navigation")
 select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades',
@@ -39,13 +53,22 @@ if select == 'Home':
 #Teachers page
 if select == 'Teachers':
     st.title('Teachers')
-    option = st.selectbox('Pick a Teacher',('AKC','DMS','BL','BS'))
-    curr.execute("SELECT * from Teachers;") # sql queries
+    sql = "SELECT * FROM Teachers;"
+    try:
+        st.dataframe(query_db(sql))
+    except:
+        st.write("Something went wrong!")
+
+    try:
+        data = query_db("SELECT initials FROM Teachers;")
+        teacher = st.selectbox('Pick a teacher', data)
+        st.dataframe(query_db("SELECT * from schedules where teacher='{}';".format(teacher)))
+    except Exception as e:
+        st.write(e)
     #possible to choose teacher then show their half days, schedules
-    data = curr.fetchall()
-    conn.close()
-    df = pd.DataFrame(data=data)
-    st.dataframe(data)
+
+    #option = st.selectbox('Pick a Teacher',(data))
+    #st.markdown("{}".format(option))
 
 #Optional Pages with overall structure
 #Students Page
@@ -76,7 +99,7 @@ if select == 'Grades':
     df = pd.DataFrame(data=data)
     st.dataframe(data)
 
-    
+
 #Schedules Page
 if select == 'Schedule':
     st.title('Schedule Details')
