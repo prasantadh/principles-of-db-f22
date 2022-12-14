@@ -63,7 +63,7 @@ if select == 'Teachers':
         data = query_db("SELECT initials FROM Teachers;")
         teacher = st.selectbox('Pick a teacher: ', data)
         st.write("Schedule: ")
-        st.dataframe(query_db("SELECT day, time, grade, room from schedules where teacher='{}' order by day, time;".format(teacher)))
+        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' order by day, time;".format(teacher)))
         st.write("Students Taught: ")
         sql = """
         SELECT distinct students.name, students.attend
