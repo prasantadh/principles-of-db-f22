@@ -53,8 +53,8 @@ if select == 'Home':
 #Teachers page
 if select == 'Teachers':
     st.title('Teachers')
-    sql = "SELECT * FROM Teachers;"
     try:
+        sql = "SELECT * FROM Teachers;"
         st.dataframe(query_db(sql))
     except:
         st.write("Something went wrong!")
@@ -84,12 +84,17 @@ if select == 'Teachers':
 #Optional Pages with overall structure
 #Students Page
 if select == 'Students':
-    st.title('Student Details')
-    curr.execute("SELECT * from Students;") # sql queries
-    data = curr.fetchall()
-    conn.close()
-    df = pd.DataFrame(data=data)
-    st.dataframe(data)
+
+    st.title('Students')
+
+    try:
+        data = query_db("SELECT name FROM Students;")
+        student = st.selectbox('Pick a student: ', data)
+        st.write("Schedule: ")
+        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules where grade=(select attend from students where name = '{}') order by day, time;".format(student)))
+        st.write("Students Taught: ")
+    except Exception as e:
+        st.write(e)
 
 #Lessons Page
 if select == 'Lessons':
