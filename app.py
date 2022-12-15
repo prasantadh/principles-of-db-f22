@@ -53,6 +53,7 @@ if select == 'Home':
 #Teachers page
 if select == 'Teachers':
     st.title('Teachers')
+    st.write('This page provides details of individual teachers')
     sql = "SELECT * FROM Teachers;"
     try:
         st.dataframe(query_db(sql))
@@ -85,6 +86,7 @@ if select == 'Teachers':
 #Students Page
 if select == 'Students':
     st.title('Student Details')
+    st.write('This page provides details of individual students')
     sql = "SELECT * FROM Students;"
     try:
         st.dataframe(query_db(sql))
@@ -170,6 +172,7 @@ if select == 'Grades':
 #Schedules Page
 if select == 'Find Substitutes':
     st.title('Schedule Details')
+    st.write('This page provides all information regarding possible substitute teachers')
     try:
         data = query_db("SELECT DISTINCT grade FROM Schedules order by grade;")
         schedule = st.selectbox('Pick a Grade: ', data)
@@ -186,7 +189,9 @@ if select == 'Find Substitutes':
         where s.teacher='{}'
         group by s.teacher, s.day
         order by s.day;""".format(teacher)))
-
+        
+        #count of each subject is required
+        #current count is the number of classes a student has all together 
         data2 = query_db("SELECT DISTINCT name FROM Students;")
         student = st.selectbox("Number of classes for student:", data2)
         st.dataframe(query_db("""
