@@ -29,7 +29,7 @@ def query_db(sql: str):
 #OUTPUT
 st.sidebar.title("Navigation")
 select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades',
-                                    'Schedules'))
+                                    'Find Substitutes'))
 #Home Page
 if select == 'Home':
     st.markdown("""
@@ -168,7 +168,7 @@ if select == 'Grades':
 
 #not sure if we need this since we have schedules in most pages
 #Schedules Page
-if select == 'Schedules':
+if select == 'Find Substitutes':
     st.title('Schedule Details')
     try:
         data = query_db("SELECT DISTINCT grade FROM Schedules order by grade;")
