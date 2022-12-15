@@ -29,7 +29,7 @@ def query_db(sql: str):
 #OUTPUT
 st.sidebar.title("Navigation")
 select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades',
-                                    'Schedule'))
+                                    'Schedules'))
 #Home Page
 if select == 'Home':
     st.markdown("""
@@ -120,7 +120,6 @@ if select == 'Students':
         st.write("Assembly Time: ")
         sql = """
         SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128))
-        
         FROM students s
         JOIN
         grades g
@@ -133,12 +132,6 @@ if select == 'Students':
 #Lessons Page
 if select == 'Lessons':
     st.title('Lesson Details')
-    sql = "SELECT * FROM Lessons;"
-    try:
-        st.dataframe(query_db(sql))
-    except:
-        st.write("Something went wrong!")
-
     try:
         data = query_db("SELECT DISTINCT day FROM Lessons;")
         lesson = st.selectbox('Pick a Lesson Time: ', data)
@@ -162,12 +155,6 @@ if select == 'Lessons':
 #Grades Page
 if select == 'Grades':
     st.title('Grade Details')
-    sql = "SELECT * FROM Grades;"
-    try:
-        st.dataframe(query_db(sql))
-    except:
-        st.write("Something went wrong!")
-
     try:
         data = query_db("SELECT DISTINCT name FROM Grades, Schedules where grades.name = schedules.grade;")
         grade = st.selectbox('Pick a Grade: ', data)
@@ -175,25 +162,19 @@ if select == 'Grades':
         st.dataframe(query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
                                  FROM schedules s
                                  WHERE grade='{}' order by day, time;'''.format(grade)))
-        st.write("Students Taught: ")
-        '''sql = """
-        SELECT distinct students.name, students.attend
-        FROM students
-        JOIN
-        schedules
-        ON students.attend=schedules.grade
-        WHERE schedules.teacher='{}'
-        ORDER BY students.attend, students.name""".format(lesson)
-        st.dataframe(query_db(sql))'''
     except Exception as e:
         st.write(e)
 
-
+#not sure if we need this since we have schedules in most pages
 #Schedules Page
-if select == 'Schedule':
+if select == 'Schedules':
     st.title('Schedule Details')
-    curr.execute("SELECT * from Schedules;") # sql queries
-    data = curr.fetchall()
-    conn.close()
-    df = pd.DataFrame(data=data)
-    st.dataframe(data)
+    try:
+        data = query_db("SELECT DISTINCT grade FROM Schedules order by grade;")
+        schedule = st.selectbox('Pick a Grade: ', data)
+        st.write("Schedule: ")
+        st.dataframe(query_db('''SELECT s.grade, s.room, s.teacher, s.day, cast(s.time as varchar(64)) as time, s.term
+                                 FROM schedules s
+                                 WHERE grade='{}' order by day, time;'''.format(schedule)))
+    except Exception as e:
+        st.write(e)
