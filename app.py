@@ -120,6 +120,7 @@ if select == 'Students':
         st.write("Assembly Time: ")
         sql = """
         SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128))
+        
         FROM students s
         JOIN
         grades g
@@ -176,5 +177,27 @@ if select == 'Schedules':
         st.dataframe(query_db('''SELECT s.grade, s.room, s.teacher, s.day, cast(s.time as varchar(64)) as time, s.term
                                  FROM schedules s
                                  WHERE grade='{}' order by day, time;'''.format(schedule)))
+
+        data1 = query_db("SELECT DISTINCT teacher FROM Schedules;")
+        teacher = st.selectbox("Number of classes for teacher:", data1)
+        st.dataframe(query_db("""
+        select s.teacher, s.day, count(*)
+        from schedules s
+        where s.teacher='{}'
+        group by s.teacher, s.day
+        order by s.day;""".format(teacher)))
+
+        data2 = query_db("SELECT DISTINCT name FROM Students;")
+        student = st.selectbox("Number of classes for student:", data2)
+        st.dataframe(query_db("""
+        select s.id, s.name, sh.grade, sh.day, sub.name as subject, count(*)
+        from students s, schedules sh, subjects sub
+        where s.attend=sh.grade
+        and s.attend = sub.grade
+        and sh.grade = sub.grade
+        and s.name='{}'
+        group by s.id, s.name, sh.grade, sh.day, sub.name
+        order by 4;""".format(student)))
+        
     except Exception as e:
         st.write(e)
