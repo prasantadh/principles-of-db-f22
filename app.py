@@ -122,7 +122,6 @@ if select == 'Students':
         st.write("Assembly Time: ")
         sql = """
         SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128))
-        
         FROM students s
         JOIN
         grades g
@@ -136,22 +135,14 @@ if select == 'Students':
 if select == 'Lessons':
     st.title('Lesson Details')
     try:
-        data = query_db("SELECT DISTINCT day FROM Lessons;")
+        data = query_db("SELECT DISTINCT day FROM Lessons order by 1;")
         lesson = st.selectbox('Pick a Lesson Time: ', data)
         st.write("Schedule: ")
-        st.dataframe(query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
+        st.dataframe(query_db('''SELECT distinct s.day, cast(s.time as varchar(128)), s.grade, s.room, s.teacher
                                  FROM schedules s
-                                 WHERE day='{}' order by day, time;'''.format(lesson)))
-        st.write("Students Taught: ")
-        '''sql = """
-        SELECT distinct students.name, students.attend
-        FROM students
-        JOIN
-        schedules
-        ON students.attend=schedules.grade
-        WHERE schedules.teacher='{}'
-        ORDER BY students.attend, students.name""".format(lesson)
-        st.dataframe(query_db(sql))'''
+                                 JOIN lessons l
+                                 ON s.day = l.day
+                                 WHERE l.day='{}';'''.format(lesson)))
     except Exception as e:
         st.write(e)
 
@@ -190,7 +181,7 @@ if select == 'Find Substitutes':
         group by s.teacher, s.day
         order by s.day;""".format(teacher)))
         
-        #count of each subject is required
+#       #count of each subject is required
         #current count is the number of classes a student has all together 
         data2 = query_db("SELECT DISTINCT name FROM Students;")
         student = st.selectbox("Number of classes for student:", data2)
