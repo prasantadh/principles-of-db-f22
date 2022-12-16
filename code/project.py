@@ -241,6 +241,12 @@ if select == 'Find Substitutes':
     teachers = get_teachers()
     absentees = st.multiselect("Who are absent today?", teachers)
     today = datetime.today().strftime('%A').upper()
+    if today == 'SATURDAY':     # avoid corner case of picking
+        today = 'SUNDAY'        # weekend day as default
+    days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
+    absent_day = st.selectbox("What's the day they will be absent?",
+            days,
+            index=days.index(today))
     for absentee in absentees:
         st.header("Absent Teacher: {}".format(absentee))
 
@@ -249,7 +255,7 @@ if select == 'Find Substitutes':
             sql = "select initials from teachers where department = (select department from teachers where initials = '{}') and initials not in {};".format(absentee, tuple(absentees + ['NONEXISTENT']));
             st.write(query_db(sql))
 
-            sql = "Select day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' and day='{}';".format(absentee, today)
+            sql = "Select day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' and day='{}';".format(absentee, absent_day)
             lessons = pd.DataFrame(query_db(sql))
             for _, day, time, grade, room in lessons.itertuples():
                 starttime = datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"')
@@ -264,9 +270,8 @@ if select == 'Find Substitutes':
                 # who are absent on that particular day
                 # also for simplicity, we decided that we are going to look into
                 # "the present day" by default
-                sql = "select A.initials from (select day, time, initials from lessons, teachers) A left join (select day, time, teacher from schedules) B on A.day = B.day and A.time=B.time and A.initials=B.teacher where B.teacher is NULL and A.day='{}' and A.time='{}' and A.initials not in {};".format(today, time, tuple(absentees + ['NON-EXISTENT']))
+                sql = "select A.initials from (select day, time, initials from lessons, teachers) A left join (select day, time, teacher from schedules) B on A.day = B.day and A.time=B.time and A.initials=B.teacher where B.teacher is NULL and A.day='{}' and A.time='{}' and A.initials not in {};".format(absent_day, time, tuple(absentees + ['NON-EXISTENT']))
                 st.dataframe(query_db(sql))
-            # Teachers who teach this grade
         except Exception as e:
             st.write(e)
 
