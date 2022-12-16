@@ -171,12 +171,20 @@ if select == 'Lessons':
 if select == 'Grades':
     st.title('Grade Details')
     try:
-        data = query_db("SELECT DISTINCT name FROM Grades, Schedules where grades.name = schedules.grade;")
-        grade = st.selectbox('Pick a Grade: ', data)
+        sql = "select attend, count(name) from students group by attend order by attend;"
+        students_count = query_db(sql)
+        st.dataframe(students_count)
+
+        grades = query_db("SELECT DISTINCT name FROM Grades, Schedules where grades.name = schedules.grade;")
+        grade = st.selectbox('Pick a Grade: ', grades)
+        # st.write("Total Student in this grade: {}".format())
         st.write("Schedule: ")
-        st.dataframe(query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
+        data = query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
                                  FROM schedules s
-                                 WHERE grade='{}' order by day, time;'''.format(grade)))
+                                 WHERE grade='{}' order by day, time;'''.format(grade))
+        # TODO: Check if we can render the time format better
+        # data['time'] = data['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M'))
+        st.dataframe(data)
     except Exception as e:
         st.write(e)
 
