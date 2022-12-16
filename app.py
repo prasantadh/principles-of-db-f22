@@ -76,7 +76,7 @@ if select == 'Teachers':
         WHERE schedules.teacher='{}'
         ORDER BY students.attend, students.name""".format(teacher)
         st.dataframe(query_db(sql))
-        
+
         st.write("Number of classes:")
         sql = """
         select s.teacher, s.day, count(*)
@@ -118,7 +118,8 @@ if select == 'Students':
         subjects sub
         ON s.attend=sub.grade
         WHERE s.name='{}';""".format(student)
-        
+        st.dataframe(query_db(sql))
+
         st.write("Number of classes: ")
         sql = """
         select s.id, s.name, sh.grade, sh.day, count(*)
@@ -129,7 +130,6 @@ if select == 'Students':
         order by 4;""".format(student)
         st.dataframe(query_db(sql))
 
-        st.dataframe(query_db(sql))
         st.write("Lunch Time: ")
         sql = """
         SELECT s.id, s.name, l.lunch_day, cast(l.lunch_time as varchar(128))
@@ -190,15 +190,6 @@ def get_teachers():
 if select == 'Find Substitutes':
     st.title('Schedule Details')
     st.write('This page provides all information regarding possible substitute teachers')
-    try:
-        data = query_db("SELECT DISTINCT grade FROM Schedules order by grade;")
-        schedule = st.selectbox('Pick a Grade: ', data)
-        st.write("Schedule: ")
-        st.dataframe(query_db('''SELECT s.grade, s.room, s.teacher, s.day, cast(s.time as varchar(64)) as time, s.term
-                                 FROM schedules s
-                                 WHERE grade='{}' order by day, time;'''.format(schedule)))
-    except Exception as e:
-        st.write(e)
 
     teachers = get_teachers()
     absentees = st.multiselect("Who are absent today?", teachers)
