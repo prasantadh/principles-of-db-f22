@@ -31,8 +31,8 @@ def query_db(sql: str):
 st.sidebar.title("Navigation")
 select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades','Rooms',
                                     'Find Substitutes'))
-def parse_time(df):
-    df = pd.DataFrame(lessons)
+def parse_time(data):
+    df = pd.DataFrame(data)
     df['starttime'] = df['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M %p'))
     df['endtime'] = df['time'].apply(lambda time: datetime.strptime(time.split(',')[1], '"%Y-%m-%d %H:%M:%S")').strftime('%H:%M %p'))
     df.drop('time', axis=1, inplace=True)
@@ -70,9 +70,14 @@ if select == 'Teachers':
 
     try:
         data = query_db("SELECT initials FROM Teachers;")
-        teacher = st.selectbox('Pick a teacher: ', data)
+        st.header('Pick a teacher: ')
+        teacher = st.selectbox('', data)
+        st.subheader("Schedule for {}".format(teacher))
         st.write("Schedule: ")
-        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' order by day, time;".format(teacher)))
+        data = query_db("SELECT day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' order by day, time;".format(teacher))
+        data = parse_time(data)
+        st.dataframe(data)
+
         st.write("Students Taught: ")
         sql = """
         SELECT distinct students.name, students.attend
@@ -115,7 +120,9 @@ if select == 'Students':
         st.header('Pick a Student:')
         student = st.selectbox('', data)
         st.subheader("Schedule for {} ".format(student))
-        st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules where grade=(select attend from students where name = '{}') order by day, time;".format(student)))
+        data = query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules where grade=(select attend from students where name = '{}') order by day, time;".format(student))
+        data = parse_time(data)
+        st.dataframe(data)
 
         st.write("Subjects: ")
         sql = """
@@ -139,23 +146,27 @@ if select == 'Students':
 
         st.write("Lunch Time: ")
         sql = """
-        SELECT s.id, s.name, l.lunch_day, cast(l.lunch_time as varchar(128))
+        SELECT s.id, s.name, l.lunch_day, cast(l.lunch_time as varchar(128)) as time
         FROM students s
         JOIN
         lunch l
         ON s.attend=l.grade
         WHERE s.name='{}';""".format(student)
-        st.dataframe(query_db(sql))
+        data = query_db(sql)
+        data = parse_time(data)
+        st.dataframe(data)
 
         st.write("Assembly Time: ")
         sql = """
-        SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128))
+        SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128)) as time
         FROM students s
         JOIN
         grades g
         ON s.attend=g.name
         WHERE s.name='{}';""".format(student)
-        st.dataframe(query_db(sql))
+        data = query_db(sql)
+        data = parse_time(data)
+        st.dataframe(data)
     except Exception as e:
         st.write(e)
 
@@ -186,8 +197,7 @@ if select == 'Grades':
         data = query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
                                  FROM schedules s
                                  WHERE grade='{}' order by day, time;'''.format(grade))
-        # TODO: Check if we can render the time format better
-        # data['time'] = data['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M'))
+        data = parse_time(data)
         st.dataframe(data)
         st.write("Total Student in this grade: {}".format(grade))
         sql = "select attend, count(name) from students group by attend order by attend;"
@@ -195,7 +205,7 @@ if select == 'Grades':
         st.dataframe(students_count)
     except Exception as e:
         st.write(e)
-        
+
 #Rooms Page
 if select =='Rooms':
     st.title("Room details")
@@ -203,9 +213,11 @@ if select =='Rooms':
              data = query_db("SELECT DISTINCT room from Schedules order by room")
              room = st.selectbox('Pick a room:', data)
              st.write("Room Schedule: ")
-             st.dataframe(query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
+             data = query_db('''SELECT s.day, cast(s.time as varchar(64)) as time, s.grade, s.room, s.teacher
                                  FROM schedules s
-                                 WHERE room='{}' order by day, time;'''.format(room)))
+                                 WHERE room='{}' order by day, time;'''.format(room))
+             data =  parse_time(data)
+             st.dataframe(data)
              st.write("Number of lessons per room:")
              sql = """SELECT room, count(*)
                      FROM schedules
