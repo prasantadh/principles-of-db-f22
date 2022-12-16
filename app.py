@@ -29,7 +29,7 @@ def query_db(sql: str):
 
 #OUTPUT
 st.sidebar.title("Navigation")
-select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades',
+select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades','Rooms',
                                     'Find Substitutes'))
 def parse_time(df):
     df = pd.DataFrame(lessons)
@@ -173,11 +173,6 @@ if select == 'Lessons':
                                  WHERE l.day='{}' order by day, time;'''.format(lesson))
         lessons = parse_time(lessons)
         st.dataframe(lessons)
-
-        st.write("Number of lessons per room:")
-        sql = """
-        select room, count(*) from schedules group by room order by room;"""
-        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
 
@@ -199,6 +194,25 @@ if select == 'Grades':
         st.dataframe(data)
     except Exception as e:
         st.write(e)
+        
+#Rooms Page
+if select =='Rooms':
+    st.title("Room details")
+    try:
+             data = query_db("SELECT DISTINCT room from Schedules order by room")
+             room = st.selectbox('Pick a room:', data)
+             st.write("Room Schedule: ")
+             st.dataframe(query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
+                                 FROM schedules s
+                                 WHERE room='{}' order by day, time;'''.format(room)))
+             st.write("Number of lessons per room:")
+             sql = """SELECT room, count(*)
+                     FROM schedules
+                     GROUP BY room
+                     ORDER BY room;"""
+             st.dataframe(query_db(sql))
+    except Exception as e:
+            st.write(e)
 
 #not sure if we need this since we have schedules in most pages
 #Schedules Page
