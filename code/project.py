@@ -239,12 +239,12 @@ if select == 'Find Substitutes':
     st.write('This page provides all information regarding possible substitute teachers')
 
     teachers = get_teachers()
-    absentees = st.multiselect("Who are absent today?", teachers)
+    absentees = st.multiselect("Who is/are absent?", teachers)
     today = datetime.today().strftime('%A').upper()
     if today == 'SATURDAY':     # avoid corner case of picking
         today = 'SUNDAY'        # weekend day as default
     days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
-    absent_day = st.selectbox("What's the day they will be absent?",
+    absent_day = st.selectbox("What day of the week are they absent (default: TODAY)?",
             days,
             index=days.index(today))
     for absentee in absentees:
