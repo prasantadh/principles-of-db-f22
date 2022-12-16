@@ -76,6 +76,15 @@ if select == 'Teachers':
         WHERE schedules.teacher='{}'
         ORDER BY students.attend, students.name""".format(teacher)
         st.dataframe(query_db(sql))
+        
+        st.write("Number of classes:")
+        sql = """
+        select s.teacher, s.day, count(*)
+        from schedules s
+        where s.teacher='{}'
+        group by s.teacher, s.day
+        order by s.day;""".format(teacher)
+        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
     #possible to choose teacher then show their half days, schedules
@@ -108,6 +117,16 @@ if select == 'Students':
         subjects sub
         ON s.attend=sub.grade
         WHERE s.name='{}';""".format(student)
+        
+        st.write("Number of classes: ")
+        sql = """
+        select s.id, s.name, sh.grade, sh.day, count(*)
+        from students s, schedules sh
+        where s.attend=sh.grade
+        and s.name='{}'
+        group by s.id, s.name, sh.grade, sh.day
+        order by 4;""".format(student)
+        st.dataframe(query_db(sql))
 
         st.dataframe(query_db(sql))
         st.write("Lunch Time: ")
