@@ -79,6 +79,8 @@ if select == 'Teachers':
         st.dataframe(data)
 
         st.write("Students Taught: ")
+        # JOIN QUERY
+        # Finding students taught by a teacher
         sql = """
         SELECT distinct students.name, students.attend
         FROM students
@@ -89,7 +91,9 @@ if select == 'Teachers':
         ORDER BY students.attend, students.name""".format(teacher)
         st.dataframe(query_db(sql))
 
-        st.write("Number of classes:")
+        # GROUP BY QUERY
+        # number of lessons that a teacher teaches
+        st.write("Number of lessons:")
         sql = """
         select s.teacher, s.day, count(*)
         from schedules s
@@ -125,6 +129,8 @@ if select == 'Students':
         st.dataframe(data)
 
         st.write("Subjects: ")
+        # JOIN QUERY
+        # Subjects that are required for a student to study
         sql = """
         SELECT s.id, s.name, sub.name as subject, sub.double_lesson, sub.term
         FROM students s
@@ -134,7 +140,9 @@ if select == 'Students':
         WHERE s.name='{}';""".format(student)
         st.dataframe(query_db(sql))
 
-        st.write("Number of classes: ")
+        st.write("Number of lessons: ")
+        # GROUP BY query
+        # number of lessons that a student has per day
         sql = """
         select s.id, s.name, sh.grade, sh.day, count(*)
         from students s, schedules sh
@@ -145,6 +153,8 @@ if select == 'Students':
         st.dataframe(query_db(sql))
 
         st.write("Lunch Time: ")
+        # JOIN QUERY
+        # Lunch time of a student
         sql = """
         SELECT s.id, s.name, l.lunch_day, cast(l.lunch_time as varchar(128)) as time
         FROM students s
@@ -157,6 +167,8 @@ if select == 'Students':
         st.dataframe(data)
 
         st.write("Assembly Time: ")
+        # JOIN QUERY
+        # Assembly lesson for a student
         sql = """
         SELECT s.id, s.name, g.assembly_day as day, cast(g.assembly_time as varchar(128)) as time
         FROM students s
@@ -219,6 +231,7 @@ if select =='Rooms':
              data =  parse_time(data)
              st.dataframe(data)
              st.write("Number of lessons per room:")
+             # GROUP BY QUERY
              sql = """SELECT room, count(*)
                      FROM schedules
                      GROUP BY room
@@ -270,6 +283,8 @@ if select == 'Find Substitutes':
                 # who are absent on that particular day
                 # also for simplicity, we decided that we are going to look into
                 # "the present day" by default
+                # JOIN QUERY
+                # find substitutes for a missing teacher
                 sql = "select A.initials from (select day, time, initials from lessons, teachers) A left join (select day, time, teacher from schedules) B on A.day = B.day and A.time=B.time and A.initials=B.teacher where B.teacher is NULL and A.day='{}' and A.time='{}' and A.initials not in {};".format(absent_day, time, tuple(absentees + ['NON-EXISTENT']))
                 st.dataframe(query_db(sql))
         except Exception as e:
