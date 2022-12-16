@@ -31,6 +31,13 @@ def query_db(sql: str):
 st.sidebar.title("Navigation")
 select = st.sidebar.radio("GO TO:",('Home','Teachers','Students', 'Lessons','Grades',
                                     'Find Substitutes'))
+def parse_time(df):
+    df = pd.DataFrame(lessons)
+    df['starttime'] = df['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M %p'))
+    df['endtime'] = df['time'].apply(lambda time: datetime.strptime(time.split(',')[1], '"%Y-%m-%d %H:%M:%S")').strftime('%H:%M %p'))
+    df.drop('time', axis=1, inplace=True)
+    return df
+
 #Home Page
 if select == 'Home':
     st.markdown("""
@@ -164,10 +171,7 @@ if select == 'Lessons':
                                  JOIN lessons l
                                  ON s.day = l.day
                                  WHERE l.day='{}' order by day, time;'''.format(lesson))
-        lessons = pd.DataFrame(lessons)
-        lessons['starttime'] = lessons['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M %p'))
-        lessons['endtime'] = lessons['time'].apply(lambda time: datetime.strptime(time.split(',')[1], '"%Y-%m-%d %H:%M:%S")').strftime('%H:%M %p'))
-        lessons.drop('time', axis=1, inplace=True)
+        lessons = parse_time(lessons)
         st.dataframe(lessons)
 
         st.write("Number of lessons per room:")
@@ -192,8 +196,6 @@ if select == 'Grades':
         data = query_db('''SELECT s.day, cast(s.time as varchar(64)), s.grade, s.room, s.teacher
                                  FROM schedules s
                                  WHERE grade='{}' order by day, time;'''.format(grade))
-        # TODO: Check if we can render the time format better
-        # data['time'] = data['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M'))
         st.dataframe(data)
     except Exception as e:
         st.write(e)
