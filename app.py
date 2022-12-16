@@ -164,6 +164,10 @@ if select == 'Lessons':
                                  JOIN lessons l
                                  ON s.day = l.day
                                  WHERE l.day='{}';'''.format(lesson)))
+        st.write("Number of lessons per room:")
+        sql = """
+        select room, count(*) from schedules group by room order by room;"""
+        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
 
