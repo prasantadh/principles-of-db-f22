@@ -96,8 +96,9 @@ if select == 'Students':
 
     try:
         data = query_db("SELECT name FROM Students;")
-        student = st.selectbox('Pick a Student: ', data)
-        st.write("Schedule: ")
+        st.header('Pick a Student:')
+        student = st.selectbox('', data)
+        st.subheader("Schedule for {} ".format(student))
         st.dataframe(query_db("SELECT day, cast(time as varchar(64)), grade, room, teacher from schedules where grade=(select attend from students where name = '{}') order by day, time;".format(student)))
 
         st.write("Subjects: ")
