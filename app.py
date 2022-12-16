@@ -10,7 +10,7 @@ def get_config(filename="database.ini", section="postgresql"):
     parser.read(filename)
     return {k: v for k, v in parser.items(section)}
 
-@st.cache
+# @st.cache
 def query_db(sql: str):
     db_info = get_config()
     conn = psycopg2.connect(**db_info)
@@ -159,11 +159,17 @@ if select == 'Lessons':
         data = query_db("SELECT DISTINCT day FROM Lessons order by 1;")
         lesson = st.selectbox('Pick a Lesson Time: ', data)
         st.write("Schedule: ")
-        st.dataframe(query_db('''SELECT distinct s.day, cast(s.time as varchar(128)), s.grade, s.room, s.teacher
+        lessons = query_db('''SELECT distinct s.day, cast(s.time as varchar(128)), s.grade, s.room, s.teacher
                                  FROM schedules s
                                  JOIN lessons l
                                  ON s.day = l.day
-                                 WHERE l.day='{}';'''.format(lesson)))
+                                 WHERE l.day='{}' order by day, time;'''.format(lesson))
+        lessons = pd.DataFrame(lessons)
+        lessons['starttime'] = lessons['time'].apply(lambda time: datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"').strftime('%H:%M %p'))
+        lessons['endtime'] = lessons['time'].apply(lambda time: datetime.strptime(time.split(',')[1], '"%Y-%m-%d %H:%M:%S")').strftime('%H:%M %p'))
+        lessons.drop('time', axis=1, inplace=True)
+        st.dataframe(lessons)
+
         st.write("Number of lessons per room:")
         sql = """
         select room, count(*) from schedules group by room order by room;"""
