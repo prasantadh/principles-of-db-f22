@@ -169,11 +169,6 @@ if select == 'Lessons':
         lessons['endtime'] = lessons['time'].apply(lambda time: datetime.strptime(time.split(',')[1], '"%Y-%m-%d %H:%M:%S")').strftime('%H:%M %p'))
         lessons.drop('time', axis=1, inplace=True)
         st.dataframe(lessons)
-
-        st.write("Number of lessons per room:")
-        sql = """
-        select room, count(*) from schedules group by room order by room;"""
-        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
 
