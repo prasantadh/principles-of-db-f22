@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 from configparser import ConfigParser
+from datetime import datetime
 
 @st.cache
 def get_config(filename="database.ini", section="postgresql"):
@@ -107,7 +108,7 @@ if select == 'Students':
         subjects sub
         ON s.attend=sub.grade
         WHERE s.name='{}';""".format(student)
-        
+
         st.dataframe(query_db(sql))
         st.write("Lunch Time: ")
         sql = """
@@ -127,7 +128,7 @@ if select == 'Students':
         grades g
         ON s.attend=g.name
         WHERE s.name='{}';""".format(student)
-        st.dataframe(query_db(sql))   
+        st.dataframe(query_db(sql))
     except Exception as e:
         st.write(e)
 
@@ -161,6 +162,11 @@ if select == 'Grades':
 
 #not sure if we need this since we have schedules in most pages
 #Schedules Page
+def get_teachers():
+    sql = "select initials from teachers;"
+    data = query_db(sql);
+    return data
+
 if select == 'Find Substitutes':
     st.title('Schedule Details')
     st.write('This page provides all information regarding possible substitute teachers')
@@ -180,9 +186,9 @@ if select == 'Find Substitutes':
         where s.teacher='{}'
         group by s.teacher, s.day
         order by s.day;""".format(teacher)))
-        
+
 #       #count of each subject is required
-        #current count is the number of classes a student has all together 
+        #current count is the number of classes a student has all together
         data2 = query_db("SELECT DISTINCT name FROM Students;")
         student = st.selectbox("Number of classes for student:", data2)
         st.dataframe(query_db("""
@@ -194,6 +200,39 @@ if select == 'Find Substitutes':
         and s.name='{}'
         group by s.id, s.name, sh.grade, sh.day, sub.name
         order by 4;""".format(student)))
-        
+
     except Exception as e:
         st.write(e)
+
+    teachers = get_teachers()
+    absentees = st.multiselect("Who are absent today?", teachers)
+    today = datetime.today().strftime('%A').upper()
+    for absentee in absentees:
+        st.header("Absent Teacher: {}".format(absentee))
+
+        try:
+            st.write("Non-Absent Teachers from the same department: ")
+            sql = "select initials from teachers where department = (select department from teachers where initials = '{}') and initials not in {};".format(absentee, tuple(absentees + ['NONEXISTENT']));
+            st.write(query_db(sql))
+
+            sql = "Select day, cast(time as varchar(64)), grade, room from schedules where teacher='{}' and day='{}';".format(absentee, today)
+            lessons = pd.DataFrame(query_db(sql))
+            for _, day, time, grade, room in lessons.itertuples():
+                starttime = datetime.strptime(time.split(',')[0], '["%Y-%m-%d %H:%M:%S"')
+                st.subheader("Lesson To Substitute: grade {} in room {} at {}".format(grade, room, starttime.strftime('%H:%M %p')))
+
+                # this query can be arbitrarily large depending on the business rule
+                # like  exclude the ones with half lessons after lunch
+                #       exclude ones who have contiguous lessons
+                #       exclude ones who have already been used for other substitutions
+                # etc. etc.
+                # however for the sake of simplicity, we decided to only exclude the ones
+                # who are absent on that particular day
+                # also for simplicity, we decided that we are going to look into
+                # "the present day" by default
+                sql = "select A.initials from (select day, time, initials from lessons, teachers) A left join (select day, time, teacher from schedules) B on A.day = B.day and A.time=B.time and A.initials=B.teacher where B.teacher is NULL and A.day='{}' and A.time='{}' and A.initials not in {};".format(today, time, tuple(absentees + ['NON-EXISTENT']))
+                st.dataframe(query_db(sql))
+            # Teachers who teach this grade
+        except Exception as e:
+            st.write(e)
+
